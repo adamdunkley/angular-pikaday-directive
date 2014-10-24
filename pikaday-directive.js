@@ -1,38 +1,41 @@
 angular.module('pikaday', [])
 
-.constant('PikadayConfig', {})
+    .constant('PikadayConfig', {})
 
-.directive('pikaday', ['PikadayConfig', function(PikadayConfig) {
-    PikadayConfig = PikadayConfig || {};
+    .directive('pikaday', ['PikadayConfig', function(PikadayConfig) {
+        PikadayConfig = PikadayConfig || {};
 
-    return {
-        scope: {
-            'date': '=ngModel'
-        },
-        require: 'ngModel',
-        link: function ($scope, elem, attrs) {
-            var options = {
-                field: elem[0],
-                defaultDate: $scope.date
-            };
-            angular.extend(options, PikadayConfig, attrs.pikaday ? $scope.$parent.$eval(attrs.pikaday) : {});
+        return {
+            scope: {
+                date: '=pikaday'
+            },
+            link: function ($scope, elem, attrs) {
+                var options = {
+                    field: elem[0]
+                };
 
-            var onSelect = options.onSelect;
+                angular.extend(options, PikadayConfig, attrs.pikadayConfig ? $scope.$parent.$eval(attrs.pikadayConfig) : {});
 
-            options.onSelect = function(date) {
-                $scope.date = date;
-                $scope.$apply($scope.date);
+                var onSelect = options.onSelect;
 
-                if (angular.isFunction(onSelect)) {
-                    onSelect();
+                if (options.setDefaultDate) {
+                    $scope.date = options.setDefaultDate;
                 }
-            };
 
-            var picker = new Pikaday(options);
+                options.onSelect = function(date) {
+                    $scope.date = date;
+                    $scope.$apply($scope.date);
 
-            $scope.$on('$destroy', function() {
-                picker.destroy();
-            });
-        }
-    };
-}]);
+                    if (angular.isFunction(onSelect)) {
+                        onSelect(date);
+                    }
+                };
+
+                var picker = new Pikaday(options);
+
+                $scope.$on('$destroy', function() {
+                    picker.destroy();
+                });
+            }
+        };
+    }]);
